@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10141d" />
+    <meta
+      name="description"
+      content="Explore drawings as Fourier epicycles in Spinier, a browser-based Fourier series simulator."
+    />
+    <title>Spinier — Fourier epicycle simulator</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Spinier home">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-name">spinier</span>
+          <span class="brand-divider" aria-hidden="true"></span>
+          <span class="brand-caption">Fourier studio</span>
+        </a>
+        <div class="top-actions">
+          <span class="local-badge"><span></span> runs locally</span>
+          <button class="button button-import" id="open-file" type="button">Open image</button>
+          <input id="file-input" type="file" accept="image/*,.svg,image/svg+xml" hidden />
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-column" aria-label="Fourier visualization">
+          <div class="stage-toolbar">
+            <label class="example-picker">
+              <span class="sr-only">Choose an example drawing</span>
+              <select id="example-select" aria-label="Example drawing">
+                <option value="star">Soft star</option>
+                <option value="shell">Spiral shell</option>
+                <option value="petals">Three petals</option>
+              </select>
+              <span class="select-chevron" aria-hidden="true">⌄</span>
+            </label>
+            <div class="plot-key" aria-label="Plot legend">
+              <span><i class="key-source" aria-hidden="true"></i>Source outline</span>
+              <span><i class="key-trace" aria-hidden="true"></i>Reconstruction</span>
+            </div>
+            <button class="icon-button" id="reset-view" type="button" aria-label="Reset simulation" title="Reset simulation">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8.28M3 4v4.28h4.28" /></svg>
+            </button>
+          </div>
+          <div class="plot-frame" id="plot-frame">
+            <canvas id="plot-canvas" role="img" aria-label="Complex plane showing the source outline, rotating Fourier vectors, and the reconstructed drawing"></canvas>
+            <div class="plot-corner plot-corner-top">COMPLEX PLANE <span>·</span> RE{ x } + IM{ y }</div>
+            <span class="axis-label axis-real" aria-hidden="true">Re</span>
+            <span class="axis-label axis-imaginary" aria-hidden="true">Im</span>
+            <div class="empty-state" id="drop-hint" hidden>Drop an SVG or image to explore its outline</div>
+          </div>
+          <div class="transport">
+            <button class="play-button" id="play-button" type="button" aria-label="Play animation">
+              <svg class="icon-play" aria-hidden="true" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z" /></svg>
+              <svg class="icon-pause" aria-hidden="true" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" /></svg>
+            </button>
+            <div class="phase-control">
+              <div class="range-heading"><label for="phase-slider">Phase</label><output id="phase-value" for="phase-slider">64%</output></div>
+              <input class="range range-phase" id="phase-slider" type="range" min="0" max="1000" value="640" aria-label="Simulation phase" />
+            </div>
+            <span class="frame-readout" id="point-readout">t = 0.640</span>
+          </div>
+          <div class="status-line" id="status-line" role="status" aria-live="polite">Soft star · ready</div>
+        </section>
+
+        <aside class="settings-rail" aria-label="Simulation settings">
+          <div class="rail-heading"><div><span class="eyebrow">PARAMETERS</span><h1>Simulation</h1></div><span class="rail-orbit" aria-hidden="true">◎</span></div>
+
+          <section class="control-section" aria-labelledby="harmonics-heading">
+            <div class="control-title"><h2 id="harmonics-heading">Harmonics</h2><output id="harmonics-value" for="harmonics-slider">8</output></div>
+            <input class="range" id="harmonics-slider" type="range" min="1" max="128" value="8" aria-label="Number of harmonics" />
+            <div class="range-ends"><span>1</span><span>128</span></div>
+            <p class="control-note">More circles hold finer details.</p>
+          </section>
+
+          <section class="control-section" aria-labelledby="speed-heading">
+            <div class="control-title"><h2 id="speed-heading">Simulation speed</h2><output id="speed-value" for="speed-slider">1×</output></div>
+            <input class="range" id="speed-slider" type="range" min="0.25" max="3" step="0.25" value="1" aria-label="Simulation speed" />
+            <div class="range-ends"><span>0.25×</span><span>3×</span></div>
+          </section>
+
+          <section class="control-section" aria-labelledby="fade-heading">
+            <div class="control-title"><h2 id="fade-heading">Trail fade</h2><output id="fade-value" for="fade-slider">36%</output></div>
+            <input class="range" id="fade-slider" type="range" min="0" max="100" value="36" aria-label="Trail fade intensity" />
+            <div class="range-ends"><span>Persistent</span><span>Quick fade</span></div>
+          </section>
+
+          <section class="control-section contour-section" aria-labelledby="contours-heading">
+            <div class="control-title"><h2 id="contours-heading">Outlines</h2><span class="section-caption" id="contour-count">1 contour</span></div>
+            <div class="threshold-row">
+              <label for="threshold-slider">Raster threshold</label>
+              <output id="threshold-value" for="threshold-slider">128</output>
+            </div>
+            <input class="range" id="threshold-slider" type="range" min="0" max="255" value="128" aria-label="Raster luminance threshold" disabled />
+            <label class="toggle-row" for="invert-toggle">
+              <span><span class="toggle-title">Invert raster</span><span class="toggle-subtitle">Trace the lighter regions</span></span>
+              <input id="invert-toggle" type="checkbox" disabled /><span class="switch" aria-hidden="true"></span>
+            </label>
+            <p class="import-detail" id="import-detail">Choose a file to inspect its contours.</p>
+          </section>
+
+          <section class="control-section layer-section" aria-labelledby="layers-heading">
+            <div class="control-title"><h2 id="layers-heading">Layers</h2></div>
+            <label class="check-row" for="orbits-toggle"><input id="orbits-toggle" type="checkbox" checked /><span class="check-box" aria-hidden="true"></span><span>Epicycle vectors</span></label>
+            <label class="check-row" for="source-toggle"><input id="source-toggle" type="checkbox" checked /><span class="check-box" aria-hidden="true"></span><span>Source outline</span></label>
+            <label class="check-row" for="grid-toggle"><input id="grid-toggle" type="checkbox" checked /><span class="check-box" aria-hidden="true"></span><span>Complex plane grid</span></label>
+          </section>
+
+          <div class="privacy-note"><span aria-hidden="true">⌁</span><span>Your images stay on this device.</span></div>
+        </aside>
+      </main>
+      <footer class="footer"><span>Spinier <span class="footer-dot">·</span> Fourier, with a little motion</span><a href="https://github.com/PhilipOfMacedon/spinier" target="_blank" rel="noreferrer">Open source on GitHub</a></footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
