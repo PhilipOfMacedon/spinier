@@ -258,7 +258,8 @@ function sampleSubpath(
     const sampled = segment.at(localDistance);
     const transformed = apply(matrix, sampled);
     if (!Number.isFinite(transformed.x) || !Number.isFinite(transformed.y)) throw new Error("SVG geometry contains invalid coordinates.");
-    points.push(transformed);
+    // SVG screen coordinates grow downward; the complex plane grows upward.
+    points.push({ x: transformed.x, y: -transformed.y });
   }
   return points;
 }

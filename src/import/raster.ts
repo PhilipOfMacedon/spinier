@@ -78,7 +78,7 @@ export function traceRaster(
     contours: traced.slice(0, maximumContours).map(({ points }, index) => ({
       id: `raster-${index}`,
       label: `Outline ${index + 1}`,
-      points,
+      points: points.map((point) => ({ x: point.x, y: -point.y })),
       closed: true,
       source: "raster",
     })),
