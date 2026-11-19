@@ -8,8 +8,15 @@ describe("raster contour tracing", () => {
     expect(result.contours).toHaveLength(1);
     expect(result.contours[0]!.closed).toBe(true);
     expect(result.contours[0]!.points).toEqual([
-      { x: 2, y: 2 }, { x: 5, y: 2 }, { x: 5, y: 5 }, { x: 2, y: 5 },
+      { x: 2, y: -2 }, { x: 5, y: -2 }, { x: 5, y: -5 }, { x: 2, y: -5 },
     ]);
+  });
+
+  it("keeps the raster's top edge above its bottom edge in complex-plane coordinates", () => {
+    const result = traceRaster(raster(7, 7, (x, y) => x === 3 && y >= 1 && y <= 3 ? BLACK : WHITE), 128, false);
+    const points = result.contours[0]!.points;
+    expect(Math.max(...points.map((point) => point.y))).toBe(-1);
+    expect(Math.min(...points.map((point) => point.y))).toBe(-4);
   });
 
   it("keeps holes and separated shapes as independent contours", () => {

@@ -12,9 +12,17 @@ describe("safe SVG contour extraction", () => {
     expect(result.contours).toHaveLength(2);
     const closed = result.contours.find((contour) => contour.closed)!;
     const open = result.contours.find((contour) => !contour.closed)!;
-    expect(closed.points[0]).toEqual({ x: 10, y: 5 });
-    expect(open.points[0]).toEqual({ x: 50, y: 45 });
+    expect(closed.points[0]).toEqual({ x: 10, y: -5 });
+    expect(open.points[0]).toEqual({ x: 50, y: -45 });
     expect(open.points.at(-1)!.x).toBeCloseTo(60, 5);
+    expect(open.points.at(-1)!.y).toBeCloseTo(-45, 5);
+  });
+
+  it("maps SVG screen y downward into negative imaginary coordinates", () => {
+    const result = parseSvgContours(`<svg xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M3 4 L3 18"/></svg>`);
+    const contour = result.contours[0]!;
+    expect(contour.points[0]!.y).toBeCloseTo(-4, 5);
+    expect(contour.points.at(-1)!.y).toBeCloseTo(-18, 5);
   });
 
   it("closes an unclosed path that uses the default SVG fill", () => {
